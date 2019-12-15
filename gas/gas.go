@@ -1,36 +1,70 @@
 package gas
 
 import (
+	"fmt"
 	"github.com/ansel1/merry"
 	"github.com/fpawel/comm"
 	"github.com/fpawel/comm/modbus"
+	"github.com/fpawel/hardware/internal/pkg"
 )
 
 type DevType int
 
 const (
-	DevTypeMil82 DevType = iota
-	DevTypeLab73CO
+	Mil82 DevType = iota
+	Lab73CO
 )
 
-func New(t DevType) Switcher{
+func Switch(devType DevType, log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error {
+
+	log = pkg.LogPrependSuffixKeys(log,
+		"тип_газового_блока", devType.String(),
+		"адрес_газового_блока", addr,
+		"клапан", n)
+	wrapErr := func(err error) error {
+		if err == nil {
+			return nil
+		}
+		return merry.Appendf(err, "тип газового блока: %s, адрес газового блока: %d, клапан: %d",
+			devType, addr, n)
+	}
+
+	d, err := devType.newSwitcher()
+	if err != nil {
+		return wrapErr(err)
+	}
+	return wrapErr(d.Switch(log, rdr, addr, n))
+}
+
+func (t DevType) String() string {
 	switch t {
-	case DevTypeMil82:
-		return gasMil82{}
-	case DevTypeLab73CO:
-		return gasLab73CO{}
+	case Mil82:
+		return "МИЛ82"
+	case Lab73CO:
+		return "Лаб73СО"
 	default:
-		panic(t)
+		return fmt.Sprintf("%d", t)
 	}
 }
 
-type Switcher interface {
-	Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte, ) error
+func (t DevType) newSwitcher() (switcher, error) {
+	switch t {
+	case Mil82:
+		return gasMil82{}, nil
+	case Lab73CO:
+		return gasLab73CO{}, nil
+	default:
+		return nil, merry.Errorf("не правильный тип пневмолока: %d", t)
+	}
 }
 
-type gasMil82 struct {}
+type switcher interface {
+	Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error
+}
 
-func (_ gasMil82) Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte, ) error{
+type gasMil82 struct{}
+
+func (_ gasMil82) Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error {
 	req := modbus.Request{
 		Addr:     addr,
 		ProtoCmd: 0x10,
@@ -42,11 +76,11 @@ func (_ gasMil82) Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus
 	return err
 }
 
-type gasLab73CO struct {}
+type gasLab73CO struct{}
 
-func (_ gasLab73CO) Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte, ) error{
+func (_ gasLab73CO) Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error {
 	req := modbus.Request{
-		Addr:     5,
+		Addr:     addr,
 		ProtoCmd: 0x10,
 		Data: []byte{
 			0, 0x32, 0, 1, 2, 0, 0,
