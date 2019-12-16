@@ -5,34 +5,18 @@ import (
 	"fmt"
 	"github.com/ansel1/merry"
 	"github.com/fpawel/comm"
-	"github.com/fpawel/comm/comport"
-	"github.com/fpawel/hardware/internal/pkg"
 	"github.com/pkg/errors"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var Err = merry.New("ошибка термокамеры")
 
-func getResponseBytes(log comm.Logger, ctx context.Context, p *comport.Port, request []byte) ([]byte, error) {
-	if p == nil {
-		return nil, merry.New("comport must be set")
-	}
-	log = pkg.LogPrependSuffixKeys(log, "comport", p.Config().Name)
-	b, err := comm.NewResponseReader(ctx, p, comm.Config{
-		TimeoutGetResponse: time.Second,
-		TimeoutEndResponse: time.Millisecond * 50,
-		MaxAttemptsRead:    3,
-		Pause:              0,
-	}, nil).GetResponse(request, log)
-	return b, merry.Appendf(err, "comport=%s", p.Config().Name)
-}
-
-func getResponseStr(log comm.Logger, ctx context.Context, p *comport.Port, s string) (float64, error) {
+func getResponse(log comm.Logger, ctx context.Context, rdr comm.ResponseReader, s string) (float64, error) {
 	s = fmt.Sprintf("\x02%s\r\n", s)
-	b, err := getResponseBytes(log, ctx, p, []byte(s))
+	b, err := rdr.GetResponse(log, ctx, []byte(s))
+
 	if err != nil {
 		return 0, newErr("нет связи", s, nil)
 	}

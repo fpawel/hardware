@@ -1,6 +1,7 @@
 package gas
 
 import (
+	"context"
 	"fmt"
 	"github.com/ansel1/merry"
 	"github.com/fpawel/comm"
@@ -15,7 +16,7 @@ const (
 	Lab73CO
 )
 
-func Switch(devType DevType, log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error {
+func Switch(log comm.Logger, ctx context.Context, devType DevType, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error {
 
 	log = pkg.LogPrependSuffixKeys(log,
 		"тип_газового_блока", devType.String(),
@@ -33,7 +34,7 @@ func Switch(devType DevType, log comm.Logger, rdr modbus.ResponseReader, addr mo
 	if err != nil {
 		return wrapErr(err)
 	}
-	return wrapErr(d.Switch(log, rdr, addr, n))
+	return wrapErr(d.Switch(log, ctx, rdr, addr, n))
 }
 
 func (t DevType) String() string {
@@ -59,12 +60,12 @@ func (t DevType) newSwitcher() (switcher, error) {
 }
 
 type switcher interface {
-	Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error
+	Switch(log comm.Logger, ctx context.Context, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error
 }
 
 type gasMil82 struct{}
 
-func (_ gasMil82) Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error {
+func (_ gasMil82) Switch(log comm.Logger, ctx context.Context, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error {
 	req := modbus.Request{
 		Addr:     addr,
 		ProtoCmd: 0x10,
@@ -72,13 +73,13 @@ func (_ gasMil82) Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus
 			0, 0x10, 0, 1, 2, 0, n,
 		},
 	}
-	_, err := rdr.GetResponse(req.Bytes(), log, nil)
+	_, err := rdr.GetResponse(log, ctx, req.Bytes(), nil)
 	return err
 }
 
 type gasLab73CO struct{}
 
-func (_ gasLab73CO) Switch(log comm.Logger, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error {
+func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error {
 	req := modbus.Request{
 		Addr:     addr,
 		ProtoCmd: 0x10,
@@ -98,7 +99,7 @@ func (_ gasLab73CO) Switch(log comm.Logger, rdr modbus.ResponseReader, addr modb
 	default:
 		return merry.Errorf("не правильный код клапана: %d", n)
 	}
-	if _, err := rdr.GetResponse(req.Bytes(), log, nil); err != nil {
+	if _, err := rdr.GetResponse(log, ctx, req.Bytes(), nil); err != nil {
 		return merry.Append(err, "переключение клапана")
 	}
 
@@ -114,7 +115,7 @@ func (_ gasLab73CO) Switch(log comm.Logger, rdr modbus.ResponseReader, addr modb
 		req.Data[3] = 0xD5
 	}
 
-	if _, err := rdr.GetResponse(req.Bytes(), log, nil); err != nil {
+	if _, err := rdr.GetResponse(log, ctx, req.Bytes(), nil); err != nil {
 		return merry.Append(err, "установка расхода")
 	}
 
