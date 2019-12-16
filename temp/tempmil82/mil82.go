@@ -18,7 +18,7 @@ func getResponse(log comm.Logger, ctx context.Context, rdr comm.ResponseReader, 
 	b, err := rdr.GetResponse(log, ctx, []byte(s))
 
 	if err != nil {
-		return 0, wrapErr(err, s, nil)
+		return 0, wrapErr(err, s, b)
 	}
 	if len(b) < 4 {
 		return 0, newErr("несоответствие протоколу: длина ответа менее 4", s, b)
@@ -68,6 +68,12 @@ func newErr(err string, strReq string, b []byte) error {
 }
 
 func wrapErr(err error, strReq string, b []byte) error {
-	return merry.Appendf(err, "%v: запрос %q: [% X], ответ %q: [% X]",
-		err, strReq, []byte(strReq), string(b), b).WithCause(Err)
+	if err == nil {
+		return nil
+	}
+	err = merry.Appendf(err, "запрос=%q", strReq).WithCause(Err)
+	if len(b) > 0 {
+		err = merry.Appendf(err, "ответ=%q", string(b))
+	}
+	return err
 }
