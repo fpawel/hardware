@@ -6,11 +6,10 @@ import (
 )
 
 type Config struct {
-	MaxAttemptsRead int           `yaml:"max_attempts_read" comment:"число попыток получения ответа"`
-	TimeoutMS       uint          `yaml:"timeout_ms" comment:"таймаут считывания, мс"`
-	Pause           time.Duration `yaml:"pause" comment:"пауза опроса, с"`
-	Server          FinsSettings  `yaml:"server" comment:"параметры ссервера omron fins"`
-	Client          FinsSettings  `yaml:"client" comment:"параметры клиента omron fins"`
+	TimeoutMS uint          `yaml:"timeout_ms" comment:"таймаут считывания, мс"`
+	Pause     time.Duration `yaml:"pause" comment:"пауза опроса, с"`
+	Server    FinsSettings  `yaml:"server" comment:"параметры ссервера omron fins"`
+	Client    FinsSettings  `yaml:"client" comment:"параметры клиента omron fins"`
 }
 
 type FinsSettings struct {
@@ -25,7 +24,7 @@ func (x FinsSettings) Address() fins.Address {
 	return fins.NewAddress(x.IP, x.Port, x.Network, x.Node, x.FinsUnit)
 }
 
-func (x Config) newClient() (*fins.Client, error) {
+func (x Config) NewFinsClient() (*fins.Client, error) {
 	c, err := fins.NewClient(x.Client.Address(), x.Server.Address())
 	if err != nil {
 		return nil, err
@@ -36,9 +35,8 @@ func (x Config) newClient() (*fins.Client, error) {
 
 func NewDefaultConfig() Config {
 	return Config{
-		MaxAttemptsRead: 20,
-		Pause:           time.Second * 2,
-		TimeoutMS:       1000,
+		Pause:     time.Second * 2,
+		TimeoutMS: 1000,
 		Server: FinsSettings{
 			IP:   "192.168.250.1",
 			Port: 9600,
