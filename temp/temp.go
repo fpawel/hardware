@@ -5,7 +5,7 @@ import (
 	"github.com/fpawel/comm"
 )
 
-type TemperatureDevice interface {
+type TemperatureDevice interface  {
 	Start(comm.Logger, context.Context) error
 	Stop(comm.Logger, context.Context) error
 	Setup(comm.Logger, context.Context, float64) error
