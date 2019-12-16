@@ -27,8 +27,8 @@ func Switch(log comm.Logger, ctx context.Context, devType DevType, rdr modbus.Re
 			return nil
 		}
 		return merry.Appendf(err, "тип_газ_блок=%s", devType).
-			Appendf("адрес_газ_блок: %d", addr).
-			Appendf("клапан= %d", n)
+			Appendf("адрес_газ_блок=%d", addr).
+			Appendf("клапан=%d", n)
 	}
 
 	d, err := devType.newSwitcher()
