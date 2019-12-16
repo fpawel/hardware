@@ -18,7 +18,7 @@ func getResponse(log comm.Logger, ctx context.Context, rdr comm.ResponseReader, 
 	b, err := rdr.GetResponse(log, ctx, []byte(s))
 
 	if err != nil {
-		return 0, newErr("нет связи", s, nil)
+		return 0, wrapErr(err, s, nil)
 	}
 	if len(b) < 4 {
 		return 0, newErr("несоответствие протоколу: длина ответа менее 4", s, b)
