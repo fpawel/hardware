@@ -12,7 +12,3 @@ func wrapErr(err error) merry.Error {
 	}
 	return merry.WithCause(err, Err)
 }
-
-func NewClient(c Config) Client {
-	return Client{c}
-}
