@@ -6,16 +6,13 @@ import (
 )
 
 type TemperatureDevice interface {
-	Start(Logger, Ctx) error
-	Stop(Logger, Ctx) error
-	Setup(Logger, Ctx, float64) error
-	Read(Logger, Ctx) (float64, error)
+	Start(comm.Logger, context.Context) error
+	Stop(comm.Logger, context.Context) error
+	Setup(comm.Logger, context.Context, float64) error
+	Read(comm.Logger, context.Context) (float64, error)
 }
 
 type Cooler interface {
-	CoolingOn(Logger, Ctx) error
-	CoolingOff(Logger, Ctx) error
+	CoolingOn(comm.Logger, context.Context) error
+	CoolingOff(comm.Logger, context.Context) error
 }
-
-type Logger = comm.Logger
-type Ctx = context.Context
