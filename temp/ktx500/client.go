@@ -15,11 +15,15 @@ type Client struct {
 	fc *fins.Client
 }
 
-func (x *Client) SetConfig(c Config) {
-	x.c = c
+func (x *Client) Close() {
 	if x.fc != nil {
 		x.fc.Close()
 	}
+}
+
+func (x *Client) SetConfig(c Config) {
+	x.c = c
+	x.Close()
 	x.fc = nil
 }
 
