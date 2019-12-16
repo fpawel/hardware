@@ -19,15 +19,16 @@ const (
 func Switch(log comm.Logger, ctx context.Context, devType DevType, rdr modbus.ResponseReader, addr modbus.Addr, n byte) error {
 
 	log = pkg.LogPrependSuffixKeys(log,
-		"тип_газового_блока", devType.String(),
-		"адрес_газового_блока", addr,
+		"тип_газ_блок", devType.String(),
+		"адрес_газ_блок", addr,
 		"клапан", n)
 	wrapErr := func(err error) error {
 		if err == nil {
 			return nil
 		}
-		return merry.Appendf(err, "тип газового блока: %s, адрес газового блока: %d, клапан: %d",
-			devType, addr, n)
+		return merry.Appendf(err, "тип_газ_блок=%s", devType).
+			Appendf("адрес_газ_блок: %d", addr).
+			Appendf("клапан= %d", n)
 	}
 
 	d, err := devType.newSwitcher()
