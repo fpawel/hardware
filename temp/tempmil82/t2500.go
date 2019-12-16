@@ -9,6 +9,13 @@ import (
 
 type T2500 struct{ p *comport.Port }
 
+func (x *T2500) Close() error {
+	if x.p != nil {
+		return x.p.Close()
+	}
+	return nil
+}
+
 func (x *T2500) SetComport(p *comport.Port) {
 	x.p = p
 }

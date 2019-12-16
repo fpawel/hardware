@@ -11,6 +11,13 @@ type T800 struct {
 	p *comport.Port
 }
 
+func (x *T800) Close() error {
+	if x.p != nil {
+		return x.p.Close()
+	}
+	return nil
+}
+
 func (x *T800) SetComport(p *comport.Port) {
 	x.p = p
 }
