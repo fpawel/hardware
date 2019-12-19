@@ -8,10 +8,10 @@ import (
 )
 
 type T800 struct {
-	r comm.ResponseReader
+	r ResponseReader
 }
 
-func NewT800(r comm.ResponseReader) temp.TemperatureDevice {
+func NewT800(r ResponseReader) temp.TemperatureDevice {
 	return T800{r: r}
 }
 

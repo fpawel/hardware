@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/ansel1/merry v1.5.0
-	github.com/fpawel/comm v0.0.0-20191216101109-5dc0313cb336
+	github.com/fpawel/comm v0.0.0-20191219111529-9bcc721ebfaf
 	github.com/fpawel/gofins v0.0.0-20190517135525-2c568bd32bf8
 	github.com/gopherjs/gopherjs v0.0.0-20191106031601-ce3c9ade29de // indirect
 	github.com/pkg/errors v0.8.1

@@ -8,10 +8,10 @@ import (
 )
 
 type T2500 struct {
-	r comm.ResponseReader
+	r ResponseReader
 }
 
-func NewT2500(r comm.ResponseReader) temp.TemperatureDevice {
+func NewT2500(r ResponseReader) temp.TemperatureDevice {
 	return T2500{r: r}
 }
 

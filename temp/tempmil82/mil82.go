@@ -6,6 +6,7 @@ import (
 	"github.com/ansel1/merry"
 	"github.com/fpawel/comm"
 	"github.com/pkg/errors"
+	"github.com/powerman/structlog"
 	"regexp"
 	"strconv"
 	"strings"
@@ -13,7 +14,11 @@ import (
 
 var Err = merry.New("ошибка термокамеры")
 
-func getResponse(log comm.Logger, ctx context.Context, rdr comm.ResponseReader, s string) (float64, error) {
+type ResponseReader interface {
+	GetResponse(*structlog.Logger, context.Context, []byte) ([]byte, error)
+}
+
+func getResponse(log comm.Logger, ctx context.Context, rdr ResponseReader, s string) (float64, error) {
 	s = fmt.Sprintf("\x02%s\r\n", s)
 	b, err := rdr.GetResponse(log, ctx, []byte(s))
 

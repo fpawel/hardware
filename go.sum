@@ -5,6 +5,10 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fpawel/comm v0.0.0-20191216101109-5dc0313cb336 h1:niM0DbaEbcF+rxpJji6FzWXYuCVss8As6RNIJZmSJew=
 github.com/fpawel/comm v0.0.0-20191216101109-5dc0313cb336/go.mod h1:W3sS3oaaitd4wtvr7Iise6lLEBfDEpRAu+GcvPmp/h4=
+github.com/fpawel/comm v0.0.0-20191219103930-2d713f30f92e h1:fKF5qTSekUcB2/JKdzhVFh87lRrZxZGX0U9oJQU13mQ=
+github.com/fpawel/comm v0.0.0-20191219103930-2d713f30f92e/go.mod h1:W3sS3oaaitd4wtvr7Iise6lLEBfDEpRAu+GcvPmp/h4=
+github.com/fpawel/comm v0.0.0-20191219111529-9bcc721ebfaf h1:p5DdpIhFz98ieam0Af1uF1S6R/ey6Ucf/YZNQoEmcjY=
+github.com/fpawel/comm v0.0.0-20191219111529-9bcc721ebfaf/go.mod h1:W3sS3oaaitd4wtvr7Iise6lLEBfDEpRAu+GcvPmp/h4=
 github.com/fpawel/gofins v0.0.0-20190517135525-2c568bd32bf8 h1:UM9aOtxe5LVZwoCTQltVvjEjcTtLqfWJ8cAkDmQsyhg=
 github.com/fpawel/gofins v0.0.0-20190517135525-2c568bd32bf8/go.mod h1:mSSHEEI65myX9PxSQLbDzWS1jkYk1hAPh+qxq6CyBD4=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
