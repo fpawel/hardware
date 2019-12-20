@@ -35,7 +35,7 @@ func Switch(log comm.Logger, ctx context.Context, devType DevType, rw io.ReadWri
 	if err != nil {
 		return wrapErr(err)
 	}
-	return wrapErr(d.Switch(log, ctx, rw, cfg, addr, n))
+	return wrapErr(d.Switch(log, ctx, rw, cfg, addr, n, prs))
 }
 
 func (t DevType) String() string {
