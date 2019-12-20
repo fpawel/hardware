@@ -1,4 +1,4 @@
-package tempmil82
+package tempcomport
 
 import (
 	"context"
@@ -17,13 +17,20 @@ var Err = merry.New("ошибка термокамеры")
 type ResponseReader struct {
 	Wr io.ReadWriter
 	C  comm.Config
+	H  HandleResponseFunc
 }
+
+type HandleResponseFunc = func(request, response string)
 
 func (rdr ResponseReader) getResponse(log comm.Logger, ctx context.Context, strRequest string) (float64, error) {
 	strRequest = fmt.Sprintf("\x02%s\r\n", strRequest)
 	var temperature float64
-	response, err := comm.GetResponse(log, ctx, rdr.C, rdr.Wr, []byte(strRequest), func(_, response []byte) (s string, err error) {
-		return string(response), checkResponse(strRequest, response, &temperature)
+	response, err := comm.GetResponse(log, ctx, rdr.C, rdr.Wr, []byte(strRequest), func(_, response []byte) (string, error) {
+		err := checkResponse(strRequest, response, &temperature)
+		if rdr.H != nil {
+			rdr.H(strRequest, string(response))
+		}
+		return string(response), err
 	})
 	if err != nil {
 		err = merry.Appendf(err, "запрос=%q", strRequest).WithCause(Err)
