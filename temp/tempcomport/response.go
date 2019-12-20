@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ansel1/merry"
 	"github.com/fpawel/comm"
+	"github.com/fpawel/hardware/internal/pkg"
 	"github.com/pkg/errors"
 	"io"
 	"regexp"
@@ -17,25 +18,22 @@ var Err = merry.New("ошибка термокамеры")
 type ResponseReader struct {
 	Wr io.ReadWriter
 	C  comm.Config
-	H  HandleResponseFunc
 }
 
 type HandleResponseFunc = func(request, response string)
 
 func (rdr ResponseReader) getResponse(log comm.Logger, ctx context.Context, strRequest string) (float64, error) {
+	log = pkg.LogPrependSuffixKeys(log, "request_temperature_device", strRequest)
 	strRequest = fmt.Sprintf("\x02%s\r\n", strRequest)
 	var temperature float64
 	response, err := comm.GetResponse(log, ctx, rdr.C, rdr.Wr, []byte(strRequest), func(_, response []byte) (string, error) {
 		err := checkResponse(strRequest, response, &temperature)
-		if rdr.H != nil {
-			rdr.H(strRequest, string(response))
-		}
 		return string(response), err
 	})
 	if err != nil {
-		err = merry.Appendf(err, "запрос=%q", strRequest).WithCause(Err)
+		err = merry.Appendf(err, "request_temperature_device=%q", strRequest).WithCause(Err)
 		if len(response) > 0 {
-			err = merry.Appendf(err, "ответ=%q", string(response))
+			err = merry.Appendf(err, "response_temperature_device=%q", string(response))
 		}
 		return 0, err
 	}
