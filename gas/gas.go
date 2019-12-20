@@ -101,7 +101,7 @@ func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, rw io.ReadWrite
 	default:
 		return merry.Errorf("не правильный код клапана: %d", n)
 	}
-	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "gas_switch", n), ctx, cfg, rw, prs); err != nil {
+	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "gas_switch", n), ctx, cfg, rw, nil); err != nil {
 		return merry.Appendf(err, "переключение клапана %d", n)
 	}
 
@@ -117,7 +117,7 @@ func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, rw io.ReadWrite
 		req.Data[3] = 0xD5
 	}
 
-	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "gas", "consumption"), ctx, cfg, rw, prs); err != nil {
+	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "gas", "consumption"), ctx, cfg, rw, nil); err != nil {
 		return merry.Append(err, "установка расхода газа")
 	}
 
