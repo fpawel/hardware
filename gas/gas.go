@@ -18,7 +18,7 @@ const (
 )
 
 func Switch(log comm.Logger, ctx context.Context, devType DevType, rw io.ReadWriter,
-	cfg comm.Config, addr modbus.Addr, n byte, prs comm.ParseResponseFunc) error {
+	cfg comm.Config, addr modbus.Addr, n byte) error {
 	log = pkg.LogPrependSuffixKeys(log,
 		"тип_газ_блок", devType.String(),
 		"адрес_газ_блок", addr,
@@ -35,7 +35,7 @@ func Switch(log comm.Logger, ctx context.Context, devType DevType, rw io.ReadWri
 	if err != nil {
 		return wrapErr(err)
 	}
-	return wrapErr(d.Switch(log, ctx, rw, cfg, addr, n, prs))
+	return wrapErr(d.Switch(log, ctx, rw, cfg, addr, n))
 }
 
 func (t DevType) String() string {
@@ -61,12 +61,12 @@ func (t DevType) newSwitcher() (switcher, error) {
 }
 
 type switcher interface {
-	Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter, cfg comm.Config, addr modbus.Addr, n byte, prs comm.ParseResponseFunc) error
+	Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter, cfg comm.Config, addr modbus.Addr, n byte) error
 }
 
 type gasMil82 struct{}
 
-func (_ gasMil82) Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter, cfg comm.Config, addr modbus.Addr, n byte, prs comm.ParseResponseFunc) error {
+func (_ gasMil82) Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter, cfg comm.Config, addr modbus.Addr, n byte) error {
 	req := modbus.Request{
 		Addr:     addr,
 		ProtoCmd: 0x10,
@@ -74,13 +74,14 @@ func (_ gasMil82) Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter,
 			0, 0x10, 0, 1, 2, 0, n,
 		},
 	}
-	_, err := req.GetResponse(log, ctx, cfg, rw, prs)
+	_, err := req.GetResponse(log, ctx, cfg, rw, nil)
 	return err
 }
 
 type gasLab73CO struct{}
 
-func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter, cfg comm.Config, addr modbus.Addr, n byte, prs comm.ParseResponseFunc) error {
+func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter, cfg comm.Config,
+	addr modbus.Addr, n byte) error {
 	req := modbus.Request{
 		Addr:     addr,
 		ProtoCmd: 0x10,
