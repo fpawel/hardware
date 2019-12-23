@@ -7,7 +7,6 @@ import (
 	"github.com/fpawel/comm"
 	"github.com/fpawel/comm/modbus"
 	"github.com/fpawel/hardware/internal/pkg"
-	"io"
 )
 
 type DevType int
@@ -17,8 +16,7 @@ const (
 	Lab73CO
 )
 
-func Switch(log comm.Logger, ctx context.Context, devType DevType, rw io.ReadWriter,
-	cfg comm.Config, addr modbus.Addr, n byte) error {
+func Switch(log comm.Logger, ctx context.Context, devType DevType, cm comm.T, addr modbus.Addr, n byte) error {
 	log = pkg.LogPrependSuffixKeys(log,
 		"тип_газ_блок", devType.String(),
 		"адрес_газ_блок", addr,
@@ -35,7 +33,7 @@ func Switch(log comm.Logger, ctx context.Context, devType DevType, rw io.ReadWri
 	if err != nil {
 		return wrapErr(err)
 	}
-	return wrapErr(d.Switch(log, ctx, rw, cfg, addr, n))
+	return wrapErr(d.Switch(log, ctx, cm, addr, n))
 }
 
 func (t DevType) String() string {
@@ -61,12 +59,12 @@ func (t DevType) newSwitcher() (switcher, error) {
 }
 
 type switcher interface {
-	Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter, cfg comm.Config, addr modbus.Addr, n byte) error
+	Switch(log comm.Logger, ctx context.Context, cm comm.T, addr modbus.Addr, n byte) error
 }
 
 type gasMil82 struct{}
 
-func (_ gasMil82) Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter, cfg comm.Config, addr modbus.Addr, n byte) error {
+func (_ gasMil82) Switch(log comm.Logger, ctx context.Context, cm comm.T, addr modbus.Addr, n byte) error {
 	req := modbus.Request{
 		Addr:     addr,
 		ProtoCmd: 0x10,
@@ -74,13 +72,13 @@ func (_ gasMil82) Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter,
 			0, 0x10, 0, 1, 2, 0, n,
 		},
 	}
-	_, err := req.GetResponse(log, ctx, cfg, rw, nil)
+	_, err := req.GetResponse(log, ctx, cm)
 	return err
 }
 
 type gasLab73CO struct{}
 
-func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, rw io.ReadWriter, cfg comm.Config,
+func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, cm comm.T,
 	addr modbus.Addr, n byte) error {
 	req := modbus.Request{
 		Addr:     addr,
@@ -101,7 +99,7 @@ func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, rw io.ReadWrite
 	default:
 		return merry.Errorf("не правильный код клапана: %d", n)
 	}
-	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "gas_switch", n), ctx, cfg, rw, nil); err != nil {
+	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "gas_switch", n), ctx, cm); err != nil {
 		return merry.Appendf(err, "переключение клапана %d", n)
 	}
 
@@ -117,7 +115,7 @@ func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, rw io.ReadWrite
 		req.Data[3] = 0xD5
 	}
 
-	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "gas", "consumption"), ctx, cfg, rw, nil); err != nil {
+	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "gas", "consumption"), ctx, cm); err != nil {
 		return merry.Append(err, "установка расхода газа")
 	}
 

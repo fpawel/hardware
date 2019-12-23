@@ -7,7 +7,6 @@ import (
 	"github.com/fpawel/comm"
 	"github.com/fpawel/hardware/internal/pkg"
 	"github.com/pkg/errors"
-	"io"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,29 +14,22 @@ import (
 
 var Err = merry.New("ошибка термокамеры")
 
-type ResponseReader struct {
-	Wr io.ReadWriter
-	C  comm.Config
-}
-
 type HandleResponseFunc = func(request, response string)
 
-func (rdr ResponseReader) getResponse(log comm.Logger, ctx context.Context, strRequest string) (float64, error) {
+func getResponse(log comm.Logger, ctx context.Context, cm comm.T, strRequest string) (float64, error) {
 	log = pkg.LogPrependSuffixKeys(log, "request_temperature_device", strRequest)
 	strRequest = fmt.Sprintf("\x02%s\r\n", strRequest)
 	var temperature float64
-	response, err := comm.GetResponse(log, ctx, rdr.C, rdr.Wr, []byte(strRequest), func(_, response []byte) (string, error) {
-		err := checkResponse(strRequest, response, &temperature)
-		return string(response), err
-	})
+	response, err := cm.GetResponse(log, ctx, []byte(strRequest))
 	if err != nil {
-		err = merry.Appendf(err, "request_temperature_device=%q", strRequest).WithCause(Err)
+		err = merry.Appendf(err, "request_temperature_device=%q", strRequest)
 		if len(response) > 0 {
 			err = merry.Appendf(err, "response_temperature_device=%q", string(response))
 		}
-		return 0, err
+		err = merry.WithCause(err, Err)
 	}
-	return temperature, nil
+	err = checkResponse(strRequest, response, &temperature)
+	return temperature, err
 }
 
 var regexTemperature = regexp.MustCompile(`^01RRD,OK,([0-9a-fA-F]{4}),([0-9a-fA-F]{4})$`)
