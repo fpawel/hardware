@@ -21,20 +21,30 @@ func getResponse(log comm.Logger, ctx context.Context, cm comm.T, strRequest str
 	strRequest = fmt.Sprintf("\x02%s\r\n", strRequest)
 	var temperature float64
 	response, err := cm.GetResponse(log, ctx, []byte(strRequest))
+
+	if err == nil {
+		err = checkResponse(strRequest, response, &temperature)
+	}
+
 	if err != nil {
 		err = merry.Appendf(err, "request_temperature_device=%q", strRequest)
 		if len(response) > 0 {
 			err = merry.Appendf(err, "response_temperature_device=%q", string(response))
 		}
-		err = merry.WithCause(err, Err)
+		return 0, merry.WithCause(err, Err)
 	}
-	err = checkResponse(strRequest, response, &temperature)
+
 	return temperature, err
 }
 
 var regexTemperature = regexp.MustCompile(`^01RRD,OK,([0-9a-fA-F]{4}),([0-9a-fA-F]{4})$`)
 
 func checkResponse(strRequest string, response []byte, t *float64) error {
+
+	if len(response) == 4 {
+		return merry.New("нет ответа от термокамеры")
+	}
+
 	if len(response) < 4 {
 		return merry.New("длина ответа менее 4")
 	}
