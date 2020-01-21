@@ -2,23 +2,22 @@ package gas
 
 import (
 	"context"
-	"fmt"
 	"github.com/ansel1/merry"
 	"github.com/fpawel/comm"
 	"github.com/fpawel/comm/modbus"
 	"github.com/fpawel/hardware/internal/pkg"
 )
 
-type DevType int
+type DevType string
 
 const (
-	Mil82 DevType = iota
-	Lab73CO
+	Mil82   DevType = "МИЛ82"
+	Lab73CO DevType = "Лаб73СО"
 )
 
 func Switch(log comm.Logger, ctx context.Context, devType DevType, cm comm.T, addr modbus.Addr, n byte) error {
 	log = pkg.LogPrependSuffixKeys(log,
-		"тип_газ_блок", devType.String(),
+		"тип_газ_блок", devType,
 		"адрес_газ_блок", addr,
 		"клапан", n)
 	wrapErr := func(err error) error {
@@ -34,17 +33,6 @@ func Switch(log comm.Logger, ctx context.Context, devType DevType, cm comm.T, ad
 		return wrapErr(err)
 	}
 	return wrapErr(d.Switch(log, ctx, cm, addr, n))
-}
-
-func (t DevType) String() string {
-	switch t {
-	case Mil82:
-		return "МИЛ82"
-	case Lab73CO:
-		return "Лаб73СО"
-	default:
-		return fmt.Sprintf("%d", t)
-	}
 }
 
 func (t DevType) newSwitcher() (switcher, error) {
