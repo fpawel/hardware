@@ -16,8 +16,11 @@ var Err = merry.New("ошибка термокамеры")
 
 type HandleResponseFunc = func(request, response string)
 
-func getResponse(log comm.Logger, ctx context.Context, cm comm.T, strRequest string) (float64, error) {
-	log = pkg.LogPrependSuffixKeys(log, "request_temperature_device", strRequest)
+func getResponse(log comm.Logger, ctx context.Context, what string, cm comm.T, strRequest string) (float64, error) {
+	log = pkg.LogPrependSuffixKeys(log,
+		"request_temperature_device", strRequest,
+		"temperature_device_command", fmt.Sprintf("`%s`", what),
+	)
 	strRequest = fmt.Sprintf("\x02%s\r\n", strRequest)
 	var temperature float64
 	response, err := cm.GetResponse(log, ctx, []byte(strRequest))
@@ -27,9 +30,9 @@ func getResponse(log comm.Logger, ctx context.Context, cm comm.T, strRequest str
 	}
 
 	if err != nil {
-		err = merry.Appendf(err, "request_temperature_device=%q", strRequest)
+		err = merry.Prependf(err, "термокамера: %s: request_temperature_device=%q", what, strRequest)
 		if len(response) > 0 {
-			err = merry.Appendf(err, "response_temperature_device=%q", string(response))
+			err = merry.Prependf(err, "response_temperature_device=%q", string(response))
 		}
 		return 0, merry.WithCause(err, Err)
 	}
