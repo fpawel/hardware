@@ -30,12 +30,12 @@ func getResponse(log comm.Logger, ctx context.Context, what string, cm comm.T, s
 		}
 		return merry.WithCause(err, Err)
 	}
-	if response, err := cm.GetResponse(log, ctx, []byte(strRawRequest)); err != nil {
+	response, err := cm.GetResponse(log, ctx, []byte(strRawRequest))
+	if err != nil {
 		return wrapErr(response, err)
-	} else {
-		if err := checkResponse(response, temperature); err == nil {
-			return wrapErr(response, err)
-		}
+	}
+	if err := checkResponse(response, temperature); err != nil {
+		return wrapErr(response, err)
 	}
 	return nil
 }
@@ -67,7 +67,7 @@ func checkResponse(response []byte, temperature *float64) error {
 
 	r := strResponse[1 : len(strResponse)-2]
 
-	if r != "01WRD,OK" {
+	if !strings.HasPrefix(r, "01RRD,OK") {
 		return merry.New("не удалось считать температуру: ответ на запрос температуры 01RRD должен начинаться со строки 01RRD,OK")
 	}
 
@@ -75,15 +75,18 @@ func checkResponse(response []byte, temperature *float64) error {
 	if len(xs) == 0 {
 		return merry.New("не правильный формат температуры")
 	}
-	if len(xs[1]) == 2 {
+	if len(xs[0]) != 3 {
 		return merry.New("не правильный формат температуры: ожидался код значения температуры и уставки")
 	}
-	n, err := strconv.ParseInt(xs[1][1], 16, 64)
+
+	str := xs[0][1]
+
+	n, err := strconv.ParseInt(str, 16, 17)
 	if err != nil {
-		err = errors.Wrapf(err, "не правильный формат температуры: %q", xs[1][1])
+		err = errors.Wrapf(err, "не правильный формат температуры: %q", str)
 		return merry.Wrap(err)
 	}
-	*temperature = float64(n) / 10
+	*temperature = float64(int16(n)) / 10
 
 	return nil
 }
