@@ -25,6 +25,13 @@ func TestGetResponse(t *testing.T) {
 		0x46, 0x46, 0x34, 0x46, 0x2C, 0x30, 0x30,
 		0x43, 0x38, 0x0D, 0x0A,
 	}, -17.7)
+
+	for n := float64(-999); n <= 999; n++ {
+		v := n / 10
+		x, err := parseTemperature(formatTemperature(v))
+		assert.NoError(t, err)
+		assert.Equal(t, v, x)
+	}
 }
 
 func testReadTemperature(t *testing.T, b []byte, value float64) {
@@ -34,6 +41,9 @@ func testReadTemperature(t *testing.T, b []byte, value float64) {
 	})
 	assert.NoError(t, getResponse(structlog.New(), context.Background(), "", cm, "01RRD,02,0001,0002", &temperature))
 	assert.Equal(t, value, temperature)
+	v, err := parseTemperature(formatTemperature(temperature))
+	assert.NoError(t, err)
+	assert.Equal(t, value, v)
 }
 
 type rw struct {

@@ -6,7 +6,6 @@ import (
 	"github.com/ansel1/merry"
 	"github.com/fpawel/comm"
 	"github.com/fpawel/hardware/internal/pkg"
-	"github.com/pkg/errors"
 	"regexp"
 	"strconv"
 	"strings"
@@ -40,7 +39,32 @@ func getResponse(log comm.Logger, ctx context.Context, what string, cm comm.T, s
 	return nil
 }
 
-var regexTemperature = regexp.MustCompile(`^01RRD,OK,([0-9a-fA-F]{4}),([0-9a-fA-F]{4})$`)
+func formatTemperature(v float64) string {
+	s := fmt.Sprintf("%04X", uint32(int16(v*10)))
+	s = s[len(s)-4:]
+	return s
+}
+
+func parseTemperature(s string) (float64, error) {
+	n, err := strconv.ParseInt(s, 16, 17)
+	if err != nil {
+		return 0, err
+	}
+	return float64(int16(n)) / 10, nil
+}
+
+var regexTemperature = regexp.MustCompile(`^\x0201RRD,OK,([\da-fA-F]{4}),([\da-fA-F]{4})\r\n$`)
+
+func parseTemperatureResponse(s string) (float64, error) {
+	xs := regexTemperature.FindAllStringSubmatch(s, -1)
+	if len(xs) == 0 {
+		return 0, merry.New("не правильный формат значения температуры")
+	}
+	if len(xs[0]) != 3 {
+		return 0, merry.New("не правильный формат значения емпературы: ожидался код значения температуры и уставки")
+	}
+	return parseTemperature(xs[0][1])
+}
 
 func checkResponse(response []byte, temperature *float64) error {
 
@@ -65,28 +89,8 @@ func checkResponse(response []byte, temperature *float64) error {
 		return nil
 	}
 
-	r := strResponse[1 : len(strResponse)-2]
+	var err error
+	*temperature, err = parseTemperatureResponse(strResponse)
+	return err
 
-	if !strings.HasPrefix(r, "01RRD,OK") {
-		return merry.New("не удалось считать температуру: ответ на запрос температуры 01RRD должен начинаться со строки 01RRD,OK")
-	}
-
-	xs := regexTemperature.FindAllStringSubmatch(r, -1)
-	if len(xs) == 0 {
-		return merry.New("не правильный формат температуры")
-	}
-	if len(xs[0]) != 3 {
-		return merry.New("не правильный формат температуры: ожидался код значения температуры и уставки")
-	}
-
-	str := xs[0][1]
-
-	n, err := strconv.ParseInt(str, 16, 17)
-	if err != nil {
-		err = errors.Wrapf(err, "не правильный формат температуры: %q", str)
-		return merry.Wrap(err)
-	}
-	*temperature = float64(int16(n)) / 10
-
-	return nil
 }

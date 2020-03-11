@@ -21,7 +21,7 @@ func (x T800) Stop(log comm.Logger, ctx context.Context) error {
 }
 
 func (x T800) Setup(log comm.Logger, ctx context.Context, value float64) error {
-	v := int64(value * 10)
+	v := int16(value * 10)
 	s := fmt.Sprintf("01WRD,01,0102,%04X", v)
 	return getResponse(log, ctx, fmt.Sprintf("уставка %v⁰C", value), comm.T(x), s, nil)
 }
