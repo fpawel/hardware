@@ -40,7 +40,7 @@ func getResponse(log comm.Logger, ctx context.Context, what string, cm comm.T, s
 }
 
 func formatTemperature(v float64) string {
-	s := fmt.Sprintf("%04X", uint32(int16(v*10)))
+	s := fmt.Sprintf("%04X", uint32(v*10))
 	s = s[len(s)-4:]
 	return s
 }

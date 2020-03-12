@@ -1,9 +1,6 @@
 package tempcomport
 
 import (
-	"context"
-	"github.com/fpawel/comm"
-	"github.com/powerman/structlog"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -32,36 +29,17 @@ func TestGetResponse(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, v, x)
 	}
+	assert.Equal(t, formatTemperature(-40), "FE70")
+	assert.Equal(t, formatTemperature(-60.5), "FDA3")
+	assert.Equal(t, formatTemperature(80.7), "0327")
+
 }
 
 func testReadTemperature(t *testing.T, b []byte, value float64) {
-	var temperature float64
-	cm := comm.New(rw{b}, comm.Config{
-		TimeoutGetResponse: 1,
-	})
-	assert.NoError(t, getResponse(structlog.New(), context.Background(), "", cm, "01RRD,02,0001,0002", &temperature))
+	temperature, err := parseTemperatureResponse(string(b))
+	assert.NoError(t, err)
 	assert.Equal(t, value, temperature)
 	v, err := parseTemperature(formatTemperature(temperature))
 	assert.NoError(t, err)
 	assert.Equal(t, value, v)
-}
-
-type rw struct {
-	d []byte
-}
-
-func (x rw) Read(p []byte) (int, error) {
-
-	if len(p) >= len(x.d) {
-		copy(p, x.d)
-	}
-	return len(x.d), nil
-}
-
-func (rw) Write(p []byte) (int, error) {
-	return len(p), nil
-}
-
-func init() {
-	comm.SetEnableLog(false)
 }
