@@ -30,6 +30,7 @@ func TestGetResponse(t *testing.T) {
 		assert.Equal(t, v, x)
 	}
 	assert.Equal(t, formatTemperature(-40), "FE70")
+	assert.Equal(t, formatTemperature(-40.5), "FE6B")
 	assert.Equal(t, formatTemperature(-60.5), "FDA3")
 	assert.Equal(t, formatTemperature(80.7), "0327")
 
