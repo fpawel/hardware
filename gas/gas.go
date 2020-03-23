@@ -66,8 +66,7 @@ func (_ gasMil82) Switch(log comm.Logger, ctx context.Context, cm comm.T, addr m
 
 type gasLab73CO struct{}
 
-func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, cm comm.T,
-	addr modbus.Addr, n byte) error {
+func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, cm comm.T, addr modbus.Addr, n byte) error {
 	req := modbus.Request{
 		Addr:     addr,
 		ProtoCmd: 0x10,
