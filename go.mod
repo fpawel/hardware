@@ -4,13 +4,12 @@ go 1.13
 
 require (
 	github.com/ansel1/merry v1.5.1
-	github.com/fpawel/comm v0.0.0-20200327053747-715b051399b8
+	github.com/fpawel/comm v0.0.0-20200416081844-217705746d78
 	github.com/fpawel/gofins v0.0.0-20190517135525-2c568bd32bf8
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
-	github.com/pkg/errors v0.9.1
 	github.com/powerman/check v1.2.1 // indirect
 	github.com/powerman/structlog v0.6.0
 	github.com/stretchr/objx v0.2.0 // indirect

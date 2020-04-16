@@ -34,6 +34,8 @@ github.com/fpawel/comm v0.0.0-20200319090813-08b8ad2d4edb h1:VEjVWwLMBQpBCmojtqT
 github.com/fpawel/comm v0.0.0-20200319090813-08b8ad2d4edb/go.mod h1:W3sS3oaaitd4wtvr7Iise6lLEBfDEpRAu+GcvPmp/h4=
 github.com/fpawel/comm v0.0.0-20200327053747-715b051399b8 h1:XC4WmPNhFktcVdITmUi0kqA1iSfqKpF9tWArzn0AHdA=
 github.com/fpawel/comm v0.0.0-20200327053747-715b051399b8/go.mod h1:W3sS3oaaitd4wtvr7Iise6lLEBfDEpRAu+GcvPmp/h4=
+github.com/fpawel/comm v0.0.0-20200416081844-217705746d78 h1:JquMZz/DrsvLGTHsqVecbwQjeIpE3eR608ZbP/GhWGg=
+github.com/fpawel/comm v0.0.0-20200416081844-217705746d78/go.mod h1:W3sS3oaaitd4wtvr7Iise6lLEBfDEpRAu+GcvPmp/h4=
 github.com/fpawel/gofins v0.0.0-20190517135525-2c568bd32bf8 h1:UM9aOtxe5LVZwoCTQltVvjEjcTtLqfWJ8cAkDmQsyhg=
 github.com/fpawel/gofins v0.0.0-20190517135525-2c568bd32bf8/go.mod h1:mSSHEEI65myX9PxSQLbDzWS1jkYk1hAPh+qxq6CyBD4=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
