@@ -23,9 +23,11 @@ func getResponse(log comm.Logger, ctx context.Context, what string, cm comm.T, s
 	strRawRequest := fmt.Sprintf("\x02%s\r\n", strRequest)
 
 	wrapErr := func(response []byte, err error) error {
-		err = merry.Prependf(err, "термокамера: %s: термокамера_запрос=%q", what, strRawRequest)
+
 		if len(response) > 0 {
-			err = merry.Prependf(err, "термокамера_ответ=%q", string(response))
+			err = merry.Prependf(err, "термокамера %s %q -> %q", what, strRawRequest, string(response))
+		} else {
+			err = merry.Prependf(err, "термокамера %s %q", what, strRawRequest)
 		}
 		return merry.WithCause(err, Err)
 	}
@@ -61,7 +63,7 @@ func parseTemperatureResponse(s string) (float64, error) {
 		return 0, merry.New("не правильный формат значения температуры")
 	}
 	if len(xs[0]) != 3 {
-		return 0, merry.New("не правильный формат значения емпературы: ожидался код значения температуры и уставки")
+		return 0, merry.New("не правильный формат ответа термокамеры: ожидался код значения температуры и уставки")
 	}
 	return parseTemperature(xs[0][1])
 }
@@ -73,16 +75,16 @@ func checkResponse(response []byte, temperature *float64) error {
 	}
 
 	if len(response) < 4 {
-		return merry.New("длина ответа менее 4")
+		return merry.New("длина ответа от термокамеры менее 4")
 	}
 	if response[0] != 2 {
-		return merry.New("первый байт ответа не 2")
+		return merry.New("первый байт ответа от термокамеры не 2")
 	}
 
 	strResponse := string(response)
 
 	if !strings.HasSuffix(strResponse, "\r\n") {
-		return merry.New("ответ должен оканчиваться байтами 0D 0A")
+		return merry.New("ответ от термокамеры должен оканчиваться байтами 0D 0A")
 	}
 
 	if temperature == nil {

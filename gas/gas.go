@@ -20,15 +20,15 @@ func Switch(log comm.Logger, ctx context.Context, devType DevType, cm comm.T, ad
 		"пневмоблок_тип", devType,
 		"пневмоблок_адрес", addr,
 		"пневмоблок_переключение", n)
+	d, err := devType.newSwitcher()
+
 	wrapErr := func(err error) error {
 		if err == nil {
 			return nil
 		}
-		return merry.Prependf(err,
-			"пневмоблок_переключение=%d пневмоблок_адрес=%d пневмоблок_тип=%s",
-			n, addr, devType)
+		return merry.Appendf(err, "пневмоблок=[код=%d адрес=%d тип=%s]", n, addr, devType)
 	}
-	d, err := devType.newSwitcher()
+
 	if err != nil {
 		return wrapErr(err)
 	}
@@ -87,7 +87,7 @@ func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, cm comm.T, addr
 		return merry.Errorf("не правильный код переключения пневмоблока: %d", n)
 	}
 	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "пневмоблок_переключение", n), ctx, cm); err != nil {
-		return merry.Appendf(err, "переключение %d", n)
+		return merry.Appendf(err, "переключение пневмоблока %d", n)
 	}
 
 	req = modbus.Request{
@@ -102,8 +102,8 @@ func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, cm comm.T, addr
 		req.Data[3] = 0xD5
 	}
 
-	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "пневмоблок_установка_расхода", "D514"), ctx, cm); err != nil {
-		return merry.Prepend(err, "установка расхода D514")
+	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "расхода", "D514"), ctx, cm); err != nil {
+		return merry.Prepend(err, "расход=D514")
 	}
 
 	return nil
