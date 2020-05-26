@@ -17,15 +17,15 @@ type HandleResponseFunc = func(request, response string)
 
 func getResponse(log comm.Logger, ctx context.Context, what string, cm comm.T, strRequest string, temperature *float64) error {
 	log = pkg.LogPrependSuffixKeys(log,
-		"request_temperature_device", strRequest,
-		"temperature_device_command", fmt.Sprintf("`%s`", what),
+		"термокамера_запрос", strRequest,
+		"термокамера_команда", fmt.Sprintf("`%s`", what),
 	)
 	strRawRequest := fmt.Sprintf("\x02%s\r\n", strRequest)
 
 	wrapErr := func(response []byte, err error) error {
-		err = merry.Prependf(err, "термокамера: %s: request_temperature_device=%q", what, strRawRequest)
+		err = merry.Prependf(err, "термокамера: %s: термокамера_запрос=%q", what, strRawRequest)
 		if len(response) > 0 {
-			err = merry.Prependf(err, "response_temperature_device=%q", string(response))
+			err = merry.Prependf(err, "термокамера_ответ=%q", string(response))
 		}
 		return merry.WithCause(err, Err)
 	}

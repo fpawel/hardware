@@ -17,16 +17,16 @@ const (
 
 func Switch(log comm.Logger, ctx context.Context, devType DevType, cm comm.T, addr modbus.Addr, n byte) error {
 	log = pkg.LogPrependSuffixKeys(log,
-		"тип_газ_блок", devType,
-		"адрес_газ_блок", addr,
-		"клапан", n)
+		"пневмоблок_тип", devType,
+		"пневмоблок_адрес", addr,
+		"пневмоблок_переключение", n)
 	wrapErr := func(err error) error {
 		if err == nil {
 			return nil
 		}
-		return merry.Appendf(err, "тип_газ_блок=%s", devType).
-			Appendf("адрес_газ_блок=%d", addr).
-			Appendf("клапан=%d", n)
+		return merry.Prependf(err,
+			"пневмоблок_переключение=%d пневмоблок_адрес=%d пневмоблок_тип=%s",
+			n, addr, devType)
 	}
 	d, err := devType.newSwitcher()
 	if err != nil {
@@ -42,7 +42,7 @@ func (t DevType) newSwitcher() (switcher, error) {
 	case Lab73CO:
 		return gasLab73CO{}, nil
 	default:
-		return nil, merry.Errorf("не правильный тип пневмолока: %d", t)
+		return nil, merry.Errorf("не правильный тип пневмоблока %q", t)
 	}
 }
 
@@ -84,10 +84,10 @@ func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, cm comm.T, addr
 	case 3:
 		req.Data[6] = 4
 	default:
-		return merry.Errorf("не правильный код клапана: %d", n)
+		return merry.Errorf("не правильный код переключения пневмоблока: %d", n)
 	}
-	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "gas_switch", n), ctx, cm); err != nil {
-		return merry.Appendf(err, "переключение клапана %d", n)
+	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "пневмоблок_переключение", n), ctx, cm); err != nil {
+		return merry.Appendf(err, "переключение %d", n)
 	}
 
 	req = modbus.Request{
@@ -102,8 +102,8 @@ func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, cm comm.T, addr
 		req.Data[3] = 0xD5
 	}
 
-	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "gas", "consumption"), ctx, cm); err != nil {
-		return merry.Append(err, "установка расхода газа")
+	if _, err := req.GetResponse(pkg.LogPrependSuffixKeys(log, "пневмоблок_установка_расхода", "D514"), ctx, cm); err != nil {
+		return merry.Prepend(err, "установка расхода D514")
 	}
 
 	return nil
