@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/ansel1/merry v1.5.1
-	github.com/fpawel/comm v0.0.0-20200527115644-4b19fe146106
+	github.com/fpawel/comm v0.0.0-20200527120236-ca9918d3aed3
 	github.com/fpawel/gofins v0.0.0-20190517135525-2c568bd32bf8
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
