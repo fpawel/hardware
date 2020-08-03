@@ -13,6 +13,7 @@ type DevType string
 const (
 	Mil82   DevType = "МИЛ82"
 	Lab73CO DevType = "Лаб73СО"
+	Ankat   DevType = "Анкат"
 )
 
 func Switch(log comm.Logger, ctx context.Context, devType DevType, cm comm.T, addr modbus.Addr, n byte) error {
@@ -41,6 +42,8 @@ func (t DevType) newSwitcher() (switcher, error) {
 		return gasMil82{}, nil
 	case Lab73CO:
 		return gasLab73CO{}, nil
+	case Ankat:
+		return ankat{}, nil
 	default:
 		return nil, merry.Errorf("не правильный тип пневмоблока %q", t)
 	}
@@ -107,4 +110,22 @@ func (_ gasLab73CO) Switch(log comm.Logger, ctx context.Context, cm comm.T, addr
 	}
 
 	return nil
+}
+
+type ankat struct{}
+
+func (_ ankat) Switch(log comm.Logger, ctx context.Context, cm comm.T, addr modbus.Addr, n byte) error {
+	var x byte
+	if n > 0 {
+		x = 1 << (n - 1)
+	}
+	req := modbus.Request{
+		Addr:     addr,
+		ProtoCmd: 0x10,
+		Data: []byte{
+			0, 0x10, 0, 1, 2, 0, x,
+		},
+	}
+	_, err := req.GetResponse(log, ctx, cm)
+	return err
 }
