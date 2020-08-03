@@ -123,7 +123,7 @@ func (_ ankat) Switch(log comm.Logger, ctx context.Context, cm comm.T, addr modb
 		Addr:     addr,
 		ProtoCmd: 0x10,
 		Data: []byte{
-			0, 0x10, 0, 1, 2, 0, x,
+			0, 0x32, 0, 1, 2, 0, x,
 		},
 	}
 	_, err := req.GetResponse(log, ctx, cm)
